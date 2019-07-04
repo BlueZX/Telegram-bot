@@ -1,0 +1,15 @@
+{
+  "name": "tesito-bot",
+  "version": "1.0.0",
+  "description": "mi bot para telegram",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "BlueZ",
+  "license": "ISC",
+  "dependencies": {
+    "duckduckgo-images-api": "^1.0.3",
+    "node-telegram-bot-api": "^0.30.0"
+  }
+}
