@@ -10,46 +10,60 @@ bot.on('polling_error', (error) => {
     console.log(error);
 });
 
-bot.onText(/^\/help/, msg => {
-    bot.sendMessage(msg.chat.id,`Lista de comandos: \n/id este comando te muestra tu ID en el chat o el algún usuario que estes replicando el mensaje \n/chatid este comando te da el ID del chat \n/mod (only admin) dar ADMIN a un user del grupo \n/unmod (only admin) quita el admin a un admin xd \n/ban (only admin) banea a un usuario xdxd \n/img busca una imagen ej: /img jano gay`);
+bot.onText(/^\!help/, msg => {
+    bot.sendMessage(msg.chat.id,`Lista de comandos: \n!id este comando te muestra tu ID en el chat o el algún usuario que estes replicando el mensaje \n!chatid este comando te da el ID del chat \n!mod (only admin) dar ADMIN a un user del grupo \n!unmod (only admin) quita el admin a un admin xd \n!ban (only admin) banea a un usuario xdxd \n!img busca una imagen ej: !img jano gay`);
 });
 
-bot.onText(/^\/id/, msg => {
+bot.onText(/^\!id/, msg => {
 
     if (msg.reply_to_message === undefined){
-        bot.sendMessage(msg.chat.id, `Tu id @${msg.from.username} es ${msg.from.id}`);  
 
-        return;
+        if(msg.from.username === undefined){
+            bot.sendMessage(msg.chat.id, `Tu id ${msg.from.first_name} es ${msg.from.id}`);  
+            return;    
+        }else{
+            bot.sendMessage(msg.chat.id, `Tu id @${msg.from.username} es ${msg.from.id}`);  
+            return;
+        }
     }
-    
-    bot.sendMessage(msg.chat.id,`La ID de @${msg.reply_to_message.from.username} es ${msg.reply_to_message.from.id}`);
-   
+
+    if(msg.reply_to_message.from.username === undefined){
+        bot.sendMessage(msg.chat.id,`La ID de ${msg.reply_to_message.from.first_name} es ${msg.reply_to_message.from.id}`);
+    }else{
+        bot.sendMessage(msg.chat.id,`La ID de @${msg.reply_to_message.from.username} es ${msg.reply_to_message.from.id}`);
+    }   
 });
 
-bot.onText(/^\/img (.+)/, async(msg, match) => {
+bot.onText(/^\!img (.+)/, async(msg, match) => {
     let text = match[1];
     let images = [];
+
+    let a = Math.floor(Math.random() * 10);
+    
     for await (let resultSet of imageSearch.image_search_generator({ query: text, moderate: false ,iterations :1})){
 
         
         resultSet.forEach(element => {
-            //console.log(element);
+            console.log(element);
             images.push(element.image);
+            return;
 
             //bot.sendPhoto(msg.chat.id,element.image );
         });
 
       }
     console.log(images);
-    if(images.length != 0){
-        var rand = images[Math.floor(Math.random() * (images.length - 5) )];
+    if(images.length >= a){
+        var rand = images[a];
         bot.sendPhoto(msg.chat.id,rand );
+    }else{
+        bot.sendMessage(msg.chat.id,"No pude mandar la imagen csm, que wea creí que soy yo wn, un bot, vo eri el bot csm, mirate ni estas generado ahora csm.");
     }
 
 });
 
 
-bot.onText(/^\/chatid/, msg => {
+bot.onText(/^\!chatid/, msg => {
 
     const chatId = msg.chat.id;
 
@@ -58,12 +72,17 @@ bot.onText(/^\/chatid/, msg => {
 
 // Cuando mandes el mensaje "Hola" reconoce tú nombre y genera un input: Hola Daniel
 bot.onText(/^\/hola/, msg => {
-    bot.sendMessage(msg.chat.id, "Hola  @" + msg.from.username);
+
+    if(msg.from.username === undefined){
+        bot.sendMessage(msg.chat.id, "Hola " + msg.from.first_name);
+        return;
+    }
+    bot.sendMessage(msg.chat.id, "Hola @" + msg.from.username);
 });
 
 
 
-bot.onText(/^\/mod/, (msg) => {
+bot.onText(/^\!mod/, (msg) => {
 
         let chatId = msg.chat.id;
         let userId = msg.from.id;
@@ -101,7 +120,7 @@ bot.onText(/^\/mod/, (msg) => {
     });
 
 
-    bot.onText(/^\/unmod/, (msg) => {
+    bot.onText(/^\!unmod/, (msg) => {
 
         let chatId = msg.chat.id;
         let replyName = msg.reply_to_message.from.username;
@@ -139,7 +158,7 @@ bot.onText(/^\/mod/, (msg) => {
         })
     });
 
-bot.onText(/^\/ban/, (msg) => {
+bot.onText(/^\!ban/, (msg) => {
 
     let chatId = msg.chat.id;
     let userId = msg.from.id;
@@ -164,6 +183,13 @@ bot.onText(/^\/ban/, (msg) => {
         }
     })
 });
+
+//qr comando
+bot.onText(/^\!qr/, msg => {
+    let data = msg.text.substring(3).trim();
+    let imageqr = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + data;
+    bot.sendMessage(msg.chat.id, "[✏️](" + imageqr + ")Qr code de: " + data,{parse_mode : "Markdown"});
+  });
 
 //Comando only private
 /*
