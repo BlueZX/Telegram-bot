@@ -52,7 +52,7 @@ bot.onText(/^\/img (.+)/, async(msg, match) => {
 
         
         resultSet.forEach(element => {
-            console.log(element);
+            // console.log(element);
             images.push(element.image);
             return;
 
@@ -60,7 +60,7 @@ bot.onText(/^\/img (.+)/, async(msg, match) => {
         });
 
       }
-    console.log(images);
+    // console.log(images);
     if(images.length >= a){
         var rand = images[a];
         bot.sendPhoto(msg.chat.id,rand );
@@ -126,7 +126,7 @@ bot.onText(/^\/yt (.+)/, async(msg, match) => {
             const data = action.data;
             const msg = action.message;
 
-            console.log(action);
+            // console.log(action);
 
             switch(data){
                 case 'mp4_720':
