@@ -1,6 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
 const imageSearch = require('duckduckgo-images-api');
 
+const fs = require('fs');
+const ytdl = require('ytdl-core');
+
 // API Token Telegram
 const token = '800475736:AAEwgsyQH0OKfNdELfj-aayxflzdrUKadl4';
 
@@ -10,8 +13,8 @@ bot.on('polling_error', (error) => {
     console.log(error);
 });
 
-bot.onText(/^\!help/, msg => {
-    bot.sendMessage(msg.chat.id,`Lista de comandos: \n!id este comando te muestra tu ID en el chat o el algún usuario que estes replicando el mensaje \n!chatid este comando te da el ID del chat \n!mod (only admin) dar ADMIN a un user del grupo \n!unmod (only admin) quita el admin a un admin xd \n!ban (only admin) banea a un usuario xdxd \n!img busca una imagen ej: !img jano gay`);
+bot.onText(/^\/help/, msg => {
+    bot.sendMessage(msg.chat.id,`Lista de comandos: \n/id muestra tu ID en el chat o el algún usuario que estes replicando el mensaje \n/chatid este comando te da el ID del chat \n/img busca una imagen ej: /img color azul\n/yt para descargar videos o audio de yutu ej: /yt https://www.youtube.com/H?=DSHRYSNSJ \n/mod (only admin) dar ADMIN a un user del grupo \n/unmod (only admin) quita el admin a un admin \n/ban (only admin) banea a un usuario`);
 });
 
 bot.onText(/^\!id/, msg => {
@@ -34,7 +37,12 @@ bot.onText(/^\!id/, msg => {
     }   
 });
 
-bot.onText(/^\!img (.+)/, async(msg, match) => {
+bot.onText(/^\/paro/, msg => {
+
+    bot.sendVideo(msg.chat.id,"archivos/paro.mp4");
+});
+
+bot.onText(/^\/img (.+)/, async(msg, match) => {
     let text = match[1];
     let images = [];
 
@@ -56,14 +64,19 @@ bot.onText(/^\!img (.+)/, async(msg, match) => {
     if(images.length >= a){
         var rand = images[a];
         bot.sendPhoto(msg.chat.id,rand );
-    }else{
-        bot.sendMessage(msg.chat.id,"No pude mandar la imagen csm, que wea creí que soy yo wn, un bot, vo eri el bot csm, mirate ni estas generado ahora csm.");
+    }
+    else if(images.length > 0){
+        var rand = images[0];
+        bot.sendPhoto(msg.chat.id,rand );
+    }
+    else{
+        bot.sendMessage(msg.chat.id,"Imagen no encontrada");
     }
 
 });
 
 
-bot.onText(/^\!chatid/, msg => {
+bot.onText(/^\/chatid/, msg => {
 
     const chatId = msg.chat.id;
 
@@ -80,9 +93,187 @@ bot.onText(/^\/hola/, msg => {
     bot.sendMessage(msg.chat.id, "Hola @" + msg.from.username);
 });
 
+bot.onText(/^\/yt (.+)/, async(msg, match) => {
+
+    let url = match[1];
+
+    
+    if(ytdl.validateURL(url)){
+        
+        let datos = await ytdl.getBasicInfo(url);  
+        let title = datos.title.replace(/[^a-zA-Z 0-9.]+/g,'');
+        let name = title.replace(/ /g,'_') + '.mp4';
+
+        const options = {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {text:'✅ 720p (.mp4)', callback_data: 'mp4_720'},
+                        {text:'✅ 480p (.mp4)', callback_data: 'mp4_480'}
+                    
+                    ],
+                    [
+                        {text:'✅ 360p (.mp4)', callback_data: 'mp4_360'},
+                        {text:'✅ .mp3 (128kbps)', callback_data: 'mp3_128'}
+                    ]
+                ]
+            }
+        };
+
+        bot.sendMessage(msg.chat.id,'Seleccione un formato para el video', options);
+
+        bot.on('callback_query', (action) => {
+            const data = action.data;
+            const msg = action.message;
+
+            console.log(action);
+
+            switch(data){
+                case 'mp4_720':
+                    bot.editMessageText("🕑 descargando el video ...",{
+                        chat_id:msg.chat.id,
+                        message_id:msg.message_id
+                    })
+                    .then(() => {
+                        ytdl(url, {format: 'mp4', quality: 136})
+                            .pipe(fs.createWriteStream('archivos/'+ name).on('finish', () => {
+                                bot.editMessageText("🕔 Enviando el video ...",{
+                                    chat_id:msg.chat.id,
+                                    message_id:msg.message_id
+                                }).then(() => {
+                                    bot.sendVideo(msg.chat.id, 'archivos/'+ name).then(() => {
+                                        bot.deleteMessage(msg.chat.id, msg.message_id);
+                                        fs.unlink('archivos/'+ name, () => { });
+                                    });
+    
+                                });
+    
+                            }))
+
+                    });
+
+                
+                    break;
+                case 'mp4_480':
+                    bot.editMessageText("🕑 descargando el video ...",{
+                        chat_id:msg.chat.id,
+                        message_id:msg.message_id
+                    })
+                    .then(() => {
+                        ytdl(url, {format: 'mp4', quality: 135 })
+                            .pipe(fs.createWriteStream('archivos/'+ name).on('finish', () => {
+                                bot.editMessageText("🕔 Enviando el video ...",{
+                                    chat_id:msg.chat.id,
+                                    message_id:msg.message_id
+                                }).then(() => {
+                                    bot.sendVideo(msg.chat.id, 'archivos/'+ name).then(() => {
+                                        bot.deleteMessage(msg.chat.id, msg.message_id);
+                                        fs.unlink('archivos/'+ name, () => { });
+                                    });
+    
+                                });
+    
+                            }))
+
+                    });
+
+                
+                    break;
+                case 'mp4_360':
+                    bot.editMessageText("🕑 descargando el video ...",{
+                        chat_id:msg.chat.id,
+                        message_id:msg.message_id
+                    })
+                    .then(() => {
+                        ytdl(url, {format: 'mp4', quality: 134 })
+                            .pipe(fs.createWriteStream('archivos/'+ name).on('finish', () => {
+                                bot.editMessageText("🕔 Enviando el video ...",{
+                                    chat_id:msg.chat.id,
+                                    message_id:msg.message_id
+                                }).then(() => {
+                                    bot.sendVideo(msg.chat.id, 'archivos/'+ name).then(() => {
+                                        bot.deleteMessage(msg.chat.id, msg.message_id);
+                                        fs.unlink('archivos/'+ name, () => { });
+                                    });
+    
+                                });
+    
+                            }))
+
+                    });
+
+                
+                    break;
+                case 'mp3_128':
+                    name =  title.replace(/ /g,'_');
+                    bot.editMessageText("🕑 descargando el audio ...",{
+                        chat_id:msg.chat.id,
+                        message_id:msg.message_id
+                    })
+                    .then(() => {
+                        ytdl(url, {quality: "highestaudio", filter: "audioonly" })
+                            .pipe(fs.createWriteStream('archivos/'+ name + '.mp3').on('finish', () => {
+                                // bot.sendMessage(msg.chat.id,'transformando el audio ...');
+                                bot.editMessageText("🕔 Enviando el audio ...",{
+                                    chat_id:msg.chat.id,
+                                    message_id:msg.message_id
+                                }).then(() => {
+                                    bot.sendAudio(msg.chat.id, 'archivos/'+ name + '.mp3').then(() => {
+                                        bot.deleteMessage(msg.chat.id, msg.message_id);
+                                        // fs.unlink('archivos/'+ name + '.aac', () => { });
+                                        fs.unlink('archivos/'+ name + '.mp3', () => { });
+                                    });
+    
+                                });
+    
+    
+                            }))
+
+                    });
+
+                
+                    break;
+                default:
+                    bot.editMessageText("🕑 descargando el video ...",{
+                        chat_id:msg.chat.id,
+                        message_id:msg.message_id
+                    })
+                    .then(() => {
+                        ytdl(url, {format: 'mp4'})
+                            .pipe(fs.createWriteStream('archivos/'+ name).on('finish', () => {
+                                bot.editMessageText("🕔 Enviando el video ...",{
+                                    chat_id:msg.chat.id,
+                                    message_id:msg.message_id
+                                }).then(() => {
+                                    bot.sendVideo(msg.chat.id, 'archivos/'+ name).then(() => {
+                                        bot.deleteMessage(msg.chat.id, msg.message_id);
+                                        fs.unlink('archivos/'+ name, () => { });
+                                    });
+    
+                                });
+    
+                            }))
+
+                    });
+
+                    break;
+            }
+
+            return;
+        });
+
+    }
+    else{
+        bot.sendMessage(msg.chat.id,'El video no se encontro');
+    }
+
+    return;
+
+});
 
 
-bot.onText(/^\!mod/, (msg) => {
+
+bot.onText(/^\/mod/, (msg) => {
 
         let chatId = msg.chat.id;
         let userId = msg.from.id;
@@ -120,7 +311,7 @@ bot.onText(/^\!mod/, (msg) => {
     });
 
 
-    bot.onText(/^\!unmod/, (msg) => {
+    bot.onText(/^\/unmod/, (msg) => {
 
         let chatId = msg.chat.id;
         let replyName = msg.reply_to_message.from.username;
@@ -158,7 +349,7 @@ bot.onText(/^\!mod/, (msg) => {
         })
     });
 
-bot.onText(/^\!ban/, (msg) => {
+bot.onText(/^\/ban/, (msg) => {
 
     let chatId = msg.chat.id;
     let userId = msg.from.id;
@@ -185,7 +376,7 @@ bot.onText(/^\!ban/, (msg) => {
 });
 
 //qr comando
-bot.onText(/^\!qr/, msg => {
+bot.onText(/^\/qr/, msg => {
     let data = msg.text.substring(3).trim();
     let imageqr = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + data;
     bot.sendMessage(msg.chat.id, "[✏️](" + imageqr + ")Qr code de: " + data,{parse_mode : "Markdown"});

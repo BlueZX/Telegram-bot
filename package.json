@@ -9,7 +9,8 @@
   "author": "BlueZ",
   "license": "ISC",
   "dependencies": {
-    "duckduckgo-images-api": "^1.0.3",
-    "node-telegram-bot-api": "^0.30.0"
+    "duckduckgo-images-api": "^1.0.5",
+    "node-telegram-bot-api": "^0.50.0",
+    "ytdl-core": "^3.1.3"
   }
 }
