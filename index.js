@@ -103,8 +103,8 @@ bot.onText(/^\/yt (.+)/, async(msg, match) => {
 
         console.log('object2');
         
-        let datos = await ytdl.getBasicInfo(url);  
-        let title = datos.title.replace(/[^a-zA-Z 0-9.]+/g,'');
+        let datos = await ytdl.getInfo(url);  
+        let title = datos.videoDetails.title.replace(/[^a-zA-Z 0-9.]+/g,'');
         let name = title.replace(/ /g,'_') + '.mp4';
 
         const options = {
