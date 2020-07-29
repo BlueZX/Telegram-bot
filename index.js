@@ -96,9 +96,12 @@ bot.onText(/^\/hola/, msg => {
 bot.onText(/^\/yt (.+)/, async(msg, match) => {
 
     let url = match[1];
+    console.log('object');
 
     
     if(ytdl.validateURL(url)){
+
+        console.log('object2');
         
         let datos = await ytdl.getBasicInfo(url);  
         let title = datos.title.replace(/[^a-zA-Z 0-9.]+/g,'');
