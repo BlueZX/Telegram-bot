@@ -96,12 +96,17 @@ bot.onText(/^\/hola/, msg => {
 bot.onText(/^\/yt (.+)/, async(msg, match) => {
 
     let url = match[1];
+    console.log('object');
+
     
     if(ytdl.validateURL(url)){
-        let datos = await ytdl.getInfo(url);  
-        let title = datos.videoDetails.title.replace(/[^a-zA-Z 0-9.]+/g,'');
-        let name = title.replace(/ /g,'_') + '.mp4';
-        //let name = ytdl.getVideoID(url) + '.mp4';
+
+        console.log('object2');
+        
+        //let datos = await ytdl.getInfo(url);  
+        //let title = datos.videoDetails.title.replace(/[^a-zA-Z 0-9.]+/g,'');
+        //let name = title.replace(/ /g,'_') + '.mp4';
+        let name = 'video_'+ ytdl.getVideoID(url) + '.mp4';
 
         const options = {
             reply_markup: {
@@ -204,8 +209,8 @@ bot.onText(/^\/yt (.+)/, async(msg, match) => {
                 
                     break;
                 case 'mp3_128':
-                    name =  title.replace(/ /g,'_');
-                    //name =  ytdl.getVideoID(url)+"";
+                    //name =  title.replace(/ /g,'_');
+                    name =  'audio_' + ytdl.getVideoID(url)+"";
 
                     bot.editMessageText("🕑 descargando el audio ...",{
                         chat_id:msg.chat.id,
